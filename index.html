@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaskuy - Pencatat Kas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Bree Serif', serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #6abf69; /* Hijau Pastel */
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        .container {
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4db8a8; /* Hijau Toska */
+            color: white;
+        }
+        .form-input {
+            margin-bottom: 10px;
+        }
+        .form-input input, .form-input select {
+            padding: 10px;
+            width: 200px;
+        }
+        .button {
+            background-color: #4db8a8; /* Hijau Toska */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #3e9b8f;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Kaskuy - Pencatat Kas</h1>
+</header>
+
+<div class="container">
+    <h2>Tambah Transaksi</h2>
+    <form id="formTransaksi">
+        <div class="form-input">
+            <label for="jenis">Jenis:</label>
+            <select id="jenis" required>
+                <option value="pemasukan">Pemasukan</option>
+                <option value="pengeluaran">Pengeluaran</option>
+            </select>
+        </div>
+        <div class="form-input">
+            <label for="deskripsi">Deskripsi:</label>
+            <input type="text" id="deskripsi" required>
+        </div>
+        <div class="form-input">
+            <label for="jumlah">Jumlah:</label>
+            <input type="number" id="jumlah" required>
+        </div>
+        <button type="submit" class="button">Tambah Transaksi</button>
+    </form>
+
+    <h2>Rincian Transaksi</h2>
+    <table id="transaksiTable">
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Jenis</th>
+                <th>Deskripsi</th>
+                <th>Jumlah</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data transaksi akan muncul di sini -->
+        </tbody>
+    </table>
+
+    <h3>Total Pemasukan: <span id="totalPemasukan">0</span></h3>
+    <h3>Total Pengeluaran: <span id="totalPengeluaran">0</span></h3>
+
+    <button class="button" id="unduhExcel">Unduh Excel</button>
+</div>
+
+<script>
+    let totalPemasukan = 0;
+    let totalPengeluaran = 0;
+    const transaksiTable = document.getElementById('transaksiTable').getElementsByTagName('tbody')[0];
+
+    // Fungsi untuk menambah transaksi
+    document.getElementById('formTransaksi').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const jenis = document.getElementById('jenis').value;
+        const deskripsi = document.getElementById('deskripsi').value;
+        const jumlah = parseFloat(document.getElementById('jumlah').value);
+
+        const row = transaksiTable.insertRow();
+        row.insertCell(0).textContent = new Date().toLocaleDateString();
+        row.insertCell(1).textContent = jenis;
+        row.insertCell(2).textContent = deskripsi;
+        row.insertCell(3).textContent = jumlah;
+
+        // Update total
+        if (jenis === 'pemasukan') {
+            totalPemasukan += jumlah;
+            document.getElementById('totalPemasukan').textContent = totalPemasukan;
+        } else {
+            totalPengeluaran += jumlah;
+            document.getElementById('totalPengeluaran').textContent = totalPengeluaran;
+        }
+
+        // Clear input form
+        document.getElementById('deskripsi').value = '';
+        document.getElementById('jumlah').value = '';
+    });
+
+    // Fungsi untuk mengunduh data sebagai Excel
+    document.getElementById('unduhExcel').addEventListener('click', function () {
+        const table = document.getElementById('transaksiTable');
+        const rows = table.rows;
+        let csv = [];
+        for (let i = 0; i < rows.length; i++) {
+            let row = rows[i];
+            let cols = row.querySelectorAll('td, th');
+            let rowData = [];
+            cols.forEach(col => rowData.push(col.innerText));
+            csv.push(rowData.join(','));
+        }
+
+        const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'transaksi_kaskuy.csv';
+        link.click();
+    });
+</script>
+
+</body>
+</html>
